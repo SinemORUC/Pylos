@@ -1,0 +1,21 @@
+<component name="libraryTable">
+  <library name="lib">
+    <ANNOTATIONS>
+      <root url="file://$PROJECT_DIR$/../../../../Program Files/jmonkeyplatform/jmonkeyplatform/lib" />
+    </ANNOTATIONS>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../../../../Program Files/jmonkeyplatform/jmonkeyplatform/lib" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="file://$PROJECT_DIR$/../../../../Program Files/jmonkeyplatform/jmonkeyplatform/lib" />
+    </JAVADOC>
+    <NATIVE>
+      <root url="file://$PROJECT_DIR$/../../../../Program Files/jmonkeyplatform/jmonkeyplatform/lib" />
+    </NATIVE>
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../../../../Program Files/jmonkeyplatform/jmonkeyplatform/lib" />
+    </SOURCES>
+    <jarDirectory url="file://$PROJECT_DIR$/../../../../Program Files/jmonkeyplatform/jmonkeyplatform/lib" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/../../../../Program Files/jmonkeyplatform/jmonkeyplatform/lib" recursive="false" type="SOURCES" />
+  </library>
+</component>
