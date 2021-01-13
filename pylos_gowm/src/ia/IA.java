@@ -1,4 +1,4 @@
-package pylos_gowm.src.ia;
+package ia;
 
 public class IA extends model.Player {
     private model.Board currentBord;

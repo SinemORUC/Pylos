@@ -1,4 +1,4 @@
-package pylos_gowm.src.ia;
+package ia;
 
 import model.Board;
 import model.Player;
