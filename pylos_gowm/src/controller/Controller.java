@@ -66,7 +66,7 @@ public abstract class Controller {
         if (!mount)
             System.out.println("AI place a ball at : " + position);
 
-        if (!currentPlayer.other().allBallsOnBoard() && (mount || currentPlayer.anySquare(position))) {
+        if (!currentPlayer.other().allBallsOnBoard() && (mount || currentPlayer.isSquare(position))) {
             for (Position removable : removables) {
                 if (mount) {
                     System.out.println("AI mount a ball from : " + removable + " to :" + position);
@@ -83,7 +83,7 @@ public abstract class Controller {
         Player currentPlayer = Model.getCurrentPlayer();
         currentPlayer.putBallOnBoard(position);
         updateView();
-        if (currentPlayer.anySquare(position) && !currentPlayer.other().allBallsOnBoard())
+        if (currentPlayer.isSquare(position) && !currentPlayer.other().allBallsOnBoard())
             removeBalls();
         else
             finishTurn();

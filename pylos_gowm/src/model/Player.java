@@ -90,7 +90,7 @@ public class Player {
         return list;
     }
 
-    public boolean anySquare(Position position) {
+    public boolean isSquare(Position position) {
         if (position.z >= 2)
             return false;
         for (List<Position> list : Position.getSquares(position)) {
