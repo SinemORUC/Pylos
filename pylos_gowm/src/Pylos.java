@@ -7,7 +7,8 @@ public class Pylos {
     public static void main(String[] args) {
         Position.initialize();
         Model.initialize();
-        while (true);
+        Controller.updateView();
+        //while (true)
 //        Controller.initialize();
     }
 }
