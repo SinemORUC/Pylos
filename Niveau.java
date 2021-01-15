@@ -10,7 +10,7 @@ public class Niveau {
 
     public void ajouterBille(int i, int j){
         if (nv[i][j] == null){
-            nv[i][j] = 
+            nv[i][j] = null;
         }
     }
 }

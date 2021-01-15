@@ -1,9 +1,6 @@
 package model;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Position {
     public static final int LEVELS = 4;
@@ -13,12 +10,11 @@ public class Position {
     private static final Position[] all = new Position[BALLS];
     private static Position top;
     private static Map<Position, List<List<Position>>> fourSquare = new HashMap<Position, List<List<Position>>>();
-    private static Map<Position, List<List<Position>>> lines = new HashMap<Position, List<List<Position>>>();
+    private static Map<Position, List<Position>> toMount = new HashMap<>();
 
     private final int x, y, z;
 
-    // private ?
-    private Position(int x, int y, int z){
+    private Position(int x, int y, int z) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -28,13 +24,13 @@ public class Position {
         return "(" + x + ", " + y + ", " + z + ")";
     }
 
-    public static void initialize(){
+    public static void initialize() {
         int all_index = 0;
         Position pos;
-        for (int level=0; level < LEVELS; level++){
+        for (int level = 0; level < LEVELS; level++) {
             positions[level] = new Position[LEVELS - level][LEVELS - level];
-            for (int y = 0; y < LEVELS - level; y++){
-                for (int x = 0; x < LEVELS - level; x++){
+            for (int y = 0; y < LEVELS - level; y++) {
+                for (int x = 0; x < LEVELS - level; x++) {
                     pos = new Position(x, y, level);
                     positions[level][y][x] = pos;
                     all[all_index++] = pos;
@@ -44,18 +40,49 @@ public class Position {
 
         top = Position.at(0, 0, LEVELS - 1);
 
-        for (Position position : all){
+        for (Position position : all) {
             fourSquare.put(position, position.fourSquare());
-            lines.put(position, position.lines());
         }
     }
 
-    public static Position at(int x, int y, int z){
+    public static Position at(int x, int y, int z) {
         return positions[z][y][x];
     }
 
-    public static boolean isValid(int x, int y, int z){
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public int getZ() {
+        return z;
+    }
+
+    public static boolean isTop(Position p) {
+        return p == top;
+    }
+
+    public static List<Position> getToMount(Position p){
+        return toMount.get(p);
+    }
+
+    public static List<List<Position>> getFourSquare(Position p) {
+        return fourSquare.get(p);
+    }
+
+    public static boolean isValid(int x, int y, int z) {
         return x >= 0 && y >= 0 && z >= 0 && x < LEVELS - z && y < LEVELS - z && z < LEVELS;
+    }
+
+    public static boolean isMiddle(int x, int y, int z){
+        if (z >= 2)
+            return false;
+        if (z == 1)
+            return x == 1 && y == 1;
+        return x > 0 && x < 3 && y > 0 && y < 3;
     }
 
     private List<Position> square() {
@@ -78,8 +105,10 @@ public class Position {
             for (int y = this.y - 1; y <= this.y; y++) {
                 if (isValid(x, y, z)) {
                     square = at(x, y, z).square();
-                    if (square != null)
+                    if (square != null) {
                         fourSquare.add(square);
+                        toMount.put(positions[x][y][z+1], square);
+                    }
                 }
             }
         }
@@ -131,6 +160,8 @@ public class Position {
         return x == y;
     }
 
-
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y, z);
+    }
 }
