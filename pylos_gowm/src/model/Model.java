@@ -1,5 +1,7 @@
 package model;
 
+import ia.IA;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,10 +15,13 @@ public abstract class Model {
 
     private static Player currentPlayer;
 
-    public static void initialize() {
+    public static void initialize(boolean ia) {
         board = new Board();
         player1 = new Player(+1);
-        player2 = new Player(-1);
+        if (ia)
+            player2 = new IA();
+        else
+            player2 = new Player(-1);
         players = new Player[]{player1, player2};
         currentPlayer = player1;
     }

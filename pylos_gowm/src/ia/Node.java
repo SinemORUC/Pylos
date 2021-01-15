@@ -54,8 +54,14 @@ public class Node {
                     squareChildren(p);
             else if (status.isMountable(p)) {
                 mountedChildren(p);
+            } else {
+                children.add(new Node(status, new Move(PLACE, p, (Position) null)));
             }
         }
+    }
+
+    public void placeChildren(Position p){
+
     }
 
     public void mountedSquareChildren(Position p) {

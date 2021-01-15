@@ -6,6 +6,7 @@ import model.Model;
 import model.Player;
 import model.Position;
 
+import java.util.List;
 import java.util.Scanner;
 //import view.View;//todo
 
@@ -16,6 +17,8 @@ public abstract class Controller {
 
     public static void initialize() {
 //        Controller.view = view;
+        Model.initialize(true);
+        updateView();
     }
 
     public static void updateView() {
@@ -27,7 +30,6 @@ public abstract class Controller {
         if (currentPlayer.allBallsOnBoard()) {
             nextTurn();
         } else {
-            setPlayerStatus("Place or mount a ball (right click)");
             if (currentPlayer instanceof IA)
                 ((IA) currentPlayer).play();
             placePlayerBall();
@@ -39,7 +41,6 @@ public abstract class Controller {
             updateView();
             Player winner = Model.getCurrentPlayer(), loser = winner.other();
             System.out.println(winner + " won");
-//            view.setStatus("Player " + winner + " won !\n Player " + loser + "lost :'(");//todo
         } else {
             nextTurn();
         }
@@ -52,11 +53,33 @@ public abstract class Controller {
 
     private static void removeBalls() {
         Model.getCurrentPlayer().removeBalls();
-        setPlayerStatus("Remove 1 or 2 balls (remove only one by a right click)");
-    }
+        List<Ball> removables = Model.getCurrentPlayer().getRemovableBalls();
+        Model.getBoard().toStringList(removables);
+        Scanner scanner = new Scanner(System.in);
+        if (removables.size() >= 2) {
+            System.out.println("Remove 1 or 2 balls");
+            int i;
+            do {
+                i = scanner.nextInt();
+            } while (i < 1 || i > 2);
 
-    private static void setPlayerStatus(String status) {
-//        view.setStatus(Model.getCurrentPlayer());//todo
+            for (int j = 0; j < i; j++) {
+                System.out.println("Select");
+                Position position = null;
+                do {
+                    System.out.println("Enter a level (1-4)");
+                    int z = scanner.nextInt() - 1;
+                    System.out.println("Enter a row (1- " + (Model.HEIGHT - z) + ")");
+                    int y = scanner.nextInt() - 1;
+                    System.out.println("Enter a column (1- " + (Model.HEIGHT - z) + ")");
+                    int x = scanner.nextInt() - 1;
+                    if (Position.isValid(x, y, z))
+                        position = Position.at(x, y, z);
+                } while (position == null || !removables.contains(position));
+            }
+        } else {
+        }
+
     }
 
     public static void placeAIBall(Position position, Position[] removables, boolean mount) {
@@ -76,22 +99,22 @@ public abstract class Controller {
                 currentPlayer.removeBall(Model.getBoard().ballAt(removable));
             }
         }
-
     }
 
     public static void placePlayerBall() {
         Scanner scan = new Scanner(System.in);
         Position position = null;
-        do{
-            System.out.println("Enter a level (1-4)");
-            int z = scan.nextInt();
-            System.out.println("Enter a row (1- " + (Model.HEIGHT - z) + ")");
-            int y = scan.nextInt();
-            System.out.println("Enter a column (1- " + (Model.HEIGHT - z) + ")");
-            int x = scan.nextInt();
-            if(Position.isValid(x,y,z))
-                position = Position.at(x,y,z);
-        } while (position == null);
+        position = Position.at(1,1,0);
+//        do {
+//            System.out.println("Enter a level (1-4)");
+//            int z = scan.nextInt() - 1;
+//            System.out.println("Enter a row (1- " + (Model.HEIGHT - z) + ")");
+//            int y = scan.nextInt() - 1;
+//            System.out.println("Enter a column (1- " + (Model.HEIGHT - z) + ")");
+//            int x = scan.nextInt() - 1;
+//            if (Position.isValid(x, y, z))
+//                position = Position.at(x, y, z);
+//        } while (position == null || !Model.canPlaceBallAt(position));
 
         Player currentPlayer = Model.getCurrentPlayer();
         currentPlayer.putBallOnBoard(position);
@@ -107,7 +130,7 @@ public abstract class Controller {
         Model.getCurrentPlayer().mountBall(ball);
 //        view.updatePositionsToMount(ball);//todo
         updateView();
-        setPlayerStatus("Choose where to place the ball");
+        System.out.println("Choose where to place the ball");
     }
 
     public static void removePlayerBall(Ball ball, boolean lastRemoved) {

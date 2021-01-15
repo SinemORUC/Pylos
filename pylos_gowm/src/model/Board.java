@@ -63,12 +63,11 @@ public class Board {
         return board.toString();
     }
 
-    public String toStringRemove() {
+    public String toStringList(List<Ball> l) {
         StringBuilder board = new StringBuilder();
         board = new StringBuilder("-----------------\t-------------\t---------\t-----\n");
         Position p;
         Ball b;
-        List<Ball> removes = Model.getCurrentPlayer().getRemovableBalls();
         boolean isValid = true;
         for (int y = 0; y < HEIGHT; y++) {
             for (int z = 0; z < HEIGHT; z++) {
@@ -79,7 +78,7 @@ public class Board {
                     board.append("|");
                     p = Position.at(x, y, z);
                     b = ballAt(p);
-                    if (removes.contains(b))
+                    if (l.contains(b))
                         board.append("\u001B[32m").append(Ball.ballToString(b)).append("\u001B[0m");
                     else
                         board.append("\u001B[31m").append(Ball.ballToString(b)).append("\u001B[0m");

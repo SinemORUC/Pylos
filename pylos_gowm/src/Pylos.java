@@ -6,8 +6,8 @@ public class Pylos {
 
     public static void main(String[] args) {
         Position.initialize();
-        Model.initialize();
-        Controller.updateView();
+        Controller.initialize();
+        Controller.initTurn();
         //while (true)
 //        Controller.initialize();
     }

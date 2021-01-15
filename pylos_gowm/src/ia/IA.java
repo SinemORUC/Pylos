@@ -10,7 +10,7 @@ import static ia.Move.Type.PLACE;
 
 public class IA extends Player {
 
-    public final static int DEPTH = 4;
+    public final static int DEPTH = 1;
     public final static int HEIGHT = 4;
 
     public IA() {
