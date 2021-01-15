@@ -10,7 +10,7 @@ import static ia.Move.Type.PLACE;
 
 public class IA extends Player {
 
-    public final static int DEPTH = 1;
+    public final static int DEPTH = 2;
     public final static int HEIGHT = 4;
 
     public IA() {
@@ -21,17 +21,21 @@ public class IA extends Player {
         Status status = new Status(Model.getBoard(), this);//todo get board
         Node root = new Node(status);
         bestMove(root, DEPTH, Integer.MIN_VALUE);
-        Move bestMove = root.getBest().getMove();
-        if (bestMove.move == PLACE){
-            Controller.placeAIBall(bestMove.placeAt, (Position[]) bestMove.getRemoves().toArray(), false);
-        } else {
-            Controller.placeAIBall(bestMove.placeAt, (Position[]) bestMove.getRemoves().toArray(), true);
+        Move bestMove = root.getBest().move;
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-        Controller.finishTurn();
+        if (bestMove.move == PLACE) {
+            Controller.placeAIBall(bestMove.placeAt, bestMove.getRemoves(), false);
+        } else {
+            Controller.placeAIBall(bestMove.placeAt, bestMove.getRemoves(), true);
+        }
     }
 
     public int bestMove(Node node, int depth, int max) {
-        if (depth == 0 || node.isEnd())
+        if (depth == 0 || node.status.isEnd())
             return node.status.evaluateStatus();
         node.createChildren();
         for (Node child : node.children) {
@@ -41,6 +45,10 @@ public class IA extends Player {
     }
 
     private int maxScore(int max, int bestMove, Node node, Node child) {
+//        if (max == bestMove && Math.random() > 0.5) {
+//            node.setBest(child);
+//            return max;
+//        }
         if (max < bestMove) {
             node.setBest(child);
             return bestMove;

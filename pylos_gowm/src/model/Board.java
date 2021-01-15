@@ -18,7 +18,7 @@ public class Board {
 
     public boolean anyBallAt(Position position) {
         for (Ball ball : balls) {
-            if (ball.getOwner().allBallsOnBoard() && ball.getPosition() == position)
+            if (ball.getPosition() == position)
                 return true;
         }
         return false;

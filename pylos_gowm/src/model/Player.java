@@ -4,16 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Player {
-    public enum Action {
-        PLACE,
-        MOUNT,
-        REMOVE,
-    }
 
     public static final int nbBalls = Model.BALLS / 2;
     public final Ball[] balls = new Ball[nbBalls];
     public final int side;
-    private Action action = Action.PLACE;
 
     public Player(int side) {
         this.side = side;
@@ -46,17 +40,17 @@ public class Player {
         return Model.getPlayer1() == this ? Model.getPlayer2() : Model.getPlayer1();
     }
 
-    public List<Ball> partitionBalls(List<Ball> ballsOnboard) {
-        List<Ball> ballsOnSide = new ArrayList<>();
-        for (Ball ball : balls) {
-            if (ball.isOnBoard()) {
-                ballsOnboard.add(ball);
-            } else {
-                ballsOnSide.add(ball);
-            }
-        }
-        return ballsOnSide;
-    }
+//    public List<Ball> partitionBalls(List<Ball> ballsOnboard) {
+//        List<Ball> ballsOnSide = new ArrayList<>();
+//        for (Ball ball : balls) {
+//            if (ball.isOnBoard()) {
+//                ballsOnboard.add(ball);
+//            } else {
+//                ballsOnSide.add(ball);
+//            }
+//        }
+//        return ballsOnSide;
+//    } //todo delete
 
     public void putBallOnBoard(Position position) {
         Ball last = lastBallOnSide();
@@ -97,7 +91,7 @@ public class Player {
             boolean validSquare = true;
             for (Position pos : list) {
                 Board board = Model.getBoard();
-                if (!board.anyBallAt(pos) || board.ballAt(pos).getOwner() != this) {
+                if (!board.anyBallAt(pos) || (board.ballAt(pos) != null && board.ballAt(pos).getOwner() != this)) {
                     validSquare = false;
                     break;
                 }
@@ -110,7 +104,6 @@ public class Player {
 
     public void mountBall(Ball ball) {
         ball.removeFromBoard();
-        action = Action.MOUNT;
     }
 
     public void removeBall(Ball ball) {
@@ -123,29 +116,5 @@ public class Player {
                 return false;
         }
         return true;
-    }
-
-    public void resetAction() {
-        action = Action.PLACE;
-    }
-
-    public boolean isMounting() {
-        return action == Action.PLACE;
-    }
-
-    public boolean isPlacing() {
-        return action == Action.PLACE || action == Action.MOUNT;
-    }
-
-    public boolean isRemoving() {
-        return action == Action.REMOVE;
-    }
-
-    public void removeBalls() {
-        action = Action.REMOVE;
-    }
-
-    public boolean canPlace() {
-        return action == Action.PLACE || action == Action.MOUNT;
     }
 }

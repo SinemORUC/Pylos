@@ -10,7 +10,7 @@ import static ia.Move.Type.MOUNT;
 
 public class Node {
     public final Status status;
-    private final Move move;
+    public final Move move;
     private Node best;
     public final List<Node> children = new ArrayList<>();
 
@@ -20,12 +20,10 @@ public class Node {
     }
 
     private Node(Status status, Move move) {
-        this.status = status.makeMove(move);
+        this.status = new Status(status);
+        this.status.makeMove(move);
         this.move = move;
-    }
-
-    public Move getMove() {
-        return move;
+        this.status.switchPlayers();
     }
 
     public Node getBest() {
@@ -36,18 +34,14 @@ public class Node {
         best = node;
     }
 
-    public boolean isEnd() {
-        return status.isEnd();
-    }
-
     public void createChildren() {
-        List<Position> playables = status.getPlayables();
+        List<Position> playables = status.queryPlayables();
         for (Position p : playables) {
             if (Position.isTop(p)) {
                 children.add(new Node(status, new Move(PLACE, p, (Position) null)));
                 return;
             }
-            if (status.squareOn(p))
+            if (status.square(p))
                 if (status.isMountable(p))
                     mountedSquareChildren(p);
                 else
@@ -60,16 +54,11 @@ public class Node {
         }
     }
 
-    public void placeChildren(Position p){
-
-    }
-
     public void mountedSquareChildren(Position p) {
-        List<Position> removables = status.getRemovables();
+        List<Position> removables = status.queryRemovables();
         List<Position> toMount = Position.getToMount(p);
-        List<Position> remToMount = status.removablesToMount(p);
         Node child;
-        for (Position remove : status.removablesToMount(p)) {
+        for (Position remove : status.positionsToMount(p)) {
             child = new Node(status, new Move(MOUNT, p, remove));
             children.add(child);
             for (Position rem : removables) {
@@ -88,7 +77,7 @@ public class Node {
     }
 
     public void squareChildren(Position p) {
-        List<Position> removables = status.getRemovables();
+        List<Position> removables = status.queryRemovables();
         Node child;
         if (removables.isEmpty()) {
             child = new Node(status, new Move(PLACE, p, p));
@@ -107,7 +96,7 @@ public class Node {
     }
 
     public void mountedChildren(Position p) {
-        List<Position> removables = status.removablesToMount(p);
+        List<Position> removables = status.positionsToMount(p);
         Node child;
         for (Position remove : removables) {
             child = new Node(status, new Move(MOUNT, p, remove));

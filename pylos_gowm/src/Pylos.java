@@ -8,7 +8,9 @@ public class Pylos {
         Position.initialize();
         Controller.initialize();
         Controller.initTurn();
-        //while (true)
-//        Controller.initialize();
+        while (!Model.isWinner()) {
+            Controller.finishTurn();
+        }
+
     }
 }

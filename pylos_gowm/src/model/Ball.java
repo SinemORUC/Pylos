@@ -18,6 +18,14 @@ public class Ball {
         return onBoard;
     }
 
+    public void setOnBoard() {
+        onBoard = true;
+    }
+
+    public void setOffBoard() {
+        onBoard = false;
+    }
+
     public Player getOwner() {
         return owner;
     }
@@ -27,7 +35,7 @@ public class Ball {
         return "Ball (" + owner.side + ", " + position + ")";
     }
 
-    public static String ballToString(Ball b){
+    public static String ballToString(Ball b) {
         if (b == null)
             return "   ";
         return b.owner.sideToString();
@@ -36,13 +44,11 @@ public class Ball {
     public void placeAt(Position position) {
         onBoard = true;
         this.position = position;
-        System.out.println(owner + " place a ball at " + position);
     }
 
     public void removeFromBoard() {
-        System.out.println(owner + " remove a ball at " + position);
         onBoard = false;
-        // position = null; // Keep the position as it might be useful (e.g.: to mount it)
+        position = null; // Keep the position as it might be useful (e.g.: to mount it)
     }
 
     public boolean isRemovable() {

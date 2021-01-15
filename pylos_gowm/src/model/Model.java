@@ -63,8 +63,8 @@ public abstract class Model {
             return false;
         if (position.z == 0)
             return true;
-        for (int x = position.x; x < position.x + 2; x++) {
-            for (int y = position.y; y < position.y + 2; y++) {
+        for (int x = position.x; x <= position.x + 1; x++) {
+            for (int y = position.y; y <= position.y + 1; y++) {
                 if (!board.anyBallAt(Position.at(x, y, position.z - 1)))
                     return false;
             }
@@ -113,8 +113,8 @@ public abstract class Model {
     public static List<Position> getPositionsToMount(Ball ball) {
         List<Position> list = new ArrayList<>();
         for (int z = ball.getPosition().z + 1; z < HEIGHT; z++) {
-            for (int x = 0; x < 4 - z; x++) {
-                for (int y = 0; y < 4 - z; y++) {
+            for (int x = 0; x < HEIGHT - z; x++) {
+                for (int y = 0; y < HEIGHT - z; y++) {
                     if (canPlaceBallAtIgnoring(Position.at(x, y, z), ball.getPosition()))
                         list.add(Position.at(x, y, z));
                 }

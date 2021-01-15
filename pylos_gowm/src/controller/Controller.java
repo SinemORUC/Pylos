@@ -22,7 +22,7 @@ public abstract class Controller {
     }
 
     public static void updateView() {
-        System.out.println(Model.modelToString() + "\r");
+        System.out.print(Model.modelToString() + "\r");
     }
 
     public static void initTurn() {
@@ -32,13 +32,32 @@ public abstract class Controller {
         } else {
             if (currentPlayer instanceof IA)
                 ((IA) currentPlayer).play();
-            placePlayerBall();
+            else {
+                List<Ball> mount = currentPlayer.getMountableBalls();
+//                mount.removeIf(b -> !b.isMountableByCurrentPlayer()); // Useless
+                if (mount.isEmpty())
+                    placePlayerBall();
+                else {
+                    Scanner scanner = new Scanner(System.in);
+                    System.out.println("There is a square of balls to mount !\n" +
+                            "Would you like to MOUNT them ? [y/n]");
+                    String answer = "";
+                    do {
+                        answer = scanner.next();
+                    } while (!answer.equals("y") && !answer.equals("n"));
+                    if (answer.equals("y")) {
+//                        System.out.println(Model.getBoard().toStringList(mount));
+                        mountPlayerBall();
+                    }
+                }
+            }
         }
     }
 
+
     public static void finishTurn() {
+        updateView();
         if (Model.isWinner()) {
-            updateView();
             Player winner = Model.getCurrentPlayer(), loser = winner.other();
             System.out.println(winner + " won");
         } else {
@@ -51,44 +70,17 @@ public abstract class Controller {
         initTurn();
     }
 
-    private static void removeBalls() {
-        Model.getCurrentPlayer().removeBalls();
-        List<Ball> removables = Model.getCurrentPlayer().getRemovableBalls();
-        Model.getBoard().toStringList(removables);
-        Scanner scanner = new Scanner(System.in);
-        if (removables.size() >= 2) {
-            System.out.println("Remove 1 or 2 balls");
-            int i;
-            do {
-                i = scanner.nextInt();
-            } while (i < 1 || i > 2);
-
-            for (int j = 0; j < i; j++) {
-                System.out.println("Select");
-                Position position = null;
-                do {
-                    System.out.println("Enter a level (1-4)");
-                    int z = scanner.nextInt() - 1;
-                    System.out.println("Enter a row (1- " + (Model.HEIGHT - z) + ")");
-                    int y = scanner.nextInt() - 1;
-                    System.out.println("Enter a column (1- " + (Model.HEIGHT - z) + ")");
-                    int x = scanner.nextInt() - 1;
-                    if (Position.isValid(x, y, z))
-                        position = Position.at(x, y, z);
-                } while (position == null || !removables.contains(position));
-            }
-        } else {
-        }
-
-    }
-
     public static void placeAIBall(Position position, Position[] removables, boolean mount) {
         Player currentPlayer = Model.getCurrentPlayer();
         currentPlayer.putBallOnBoard(position);
-        // updateView();
+        updateView();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if (!mount)
             System.out.println("AI place a ball at : " + position);
-
         if (!currentPlayer.other().allBallsOnBoard() && (mount || currentPlayer.isSquare(position))) {
             for (Position removable : removables) {
                 if (mount) {
@@ -97,6 +89,12 @@ public abstract class Controller {
                 } else
                     System.out.println("AI removes a ball at : " + removable);
                 currentPlayer.removeBall(Model.getBoard().ballAt(removable));
+                updateView();
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -104,45 +102,79 @@ public abstract class Controller {
     public static void placePlayerBall() {
         Scanner scan = new Scanner(System.in);
         Position position = null;
-        position = Position.at(1,1,0);
-//        do {
-//            System.out.println("Enter a level (1-4)");
-//            int z = scan.nextInt() - 1;
-//            System.out.println("Enter a row (1- " + (Model.HEIGHT - z) + ")");
-//            int y = scan.nextInt() - 1;
-//            System.out.println("Enter a column (1- " + (Model.HEIGHT - z) + ")");
-//            int x = scan.nextInt() - 1;
-//            if (Position.isValid(x, y, z))
-//                position = Position.at(x, y, z);
-//        } while (position == null || !Model.canPlaceBallAt(position));
-
+        do {
+            System.out.println("Enter a level (1-4)");
+            int z = scan.nextInt() - 1;
+            System.out.println("Enter a row (1- " + (Model.HEIGHT - z) + ")");
+            int y = scan.nextInt() - 1;
+            System.out.println("Enter a column (1- " + (Model.HEIGHT - z) + ")");
+            int x = scan.nextInt() - 1;
+            if (Position.isValid(x, y, z)) {
+                position = Position.at(x, y, z);
+            }
+        } while (position == null || !Model.canPlaceBallAt(position));
         Player currentPlayer = Model.getCurrentPlayer();
         currentPlayer.putBallOnBoard(position);
         updateView();
         if (currentPlayer.isSquare(position) && !currentPlayer.other().allBallsOnBoard())
-            removeBalls();
-        else
-            finishTurn();
-
+            removePlayerBalls();
     }
 
-    public static void mountPlayerBall(Ball ball) {
+    private static void removePlayerBalls() {
+        List<Ball> removables = Model.getCurrentPlayer().getRemovableBalls();
+        Model.getBoard().toStringList(removables);
+        Scanner scanner = new Scanner(System.in);
+        if (!removables.isEmpty()) {
+            System.out.println("Remove 1 or 2 balls : ");
+            int i;
+            do {
+                i = scanner.nextInt();
+            } while (i < 1 || i > 2);
+            Ball b = null;
+            for (int j = 0; j < i; j++) {
+                if (j == 0)
+                    System.out.println("Select first ball to remove : ");
+                else
+                    System.out.println("Select second ball to remove : ");
+                Position position = null;
+                do {
+                    System.out.print("Enter a level (1-4) : ");
+                    int z = scanner.nextInt() - 1;
+                    System.out.print("Enter a row (1- " + (Model.HEIGHT - z) + ") : ");
+                    int y = scanner.nextInt() - 1;
+                    System.out.print("Enter a column (1- " + (Model.HEIGHT - z) + ") : ");
+                    int x = scanner.nextInt() - 1;
+                    if (Position.isValid(x, y, z)) {
+                        position = Position.at(x, y, z);
+                        b = Model.getBoard().ballAt(position);
+                    }
+                } while (position == null || !removables.contains(b));
+                Model.getCurrentPlayer().removeBall(b);
+                updateView();
+            }
+        }
+    }
+
+    private static void mountPlayerBall() {
+        Scanner scan = new Scanner(System.in);
+        Position position;
+        Ball ball = null;
+        List<Ball> removable = Model.getCurrentPlayer().getRemovableBalls();
+        System.out.println("Select the ball to mount (move an upper level) : ");
+        do {
+            System.out.println("Enter a level (1-4)");
+            int z = scan.nextInt() - 1;
+            System.out.println("Enter a row (1- " + (Model.HEIGHT - z) + ")");
+            int y = scan.nextInt() - 1;
+            System.out.println("Enter a column (1- " + (Model.HEIGHT - z) + ")");
+            int x = scan.nextInt() - 1;
+            if (Position.isValid(x, y, z)) {
+                position = Position.at(x, y, z);
+                ball = Model.getBoard().ballAt(position);
+            }
+        } while (!removable.contains(ball));
         Model.getCurrentPlayer().mountBall(ball);
-//        view.updatePositionsToMount(ball);//todo
         updateView();
-        System.out.println("Choose where to place the ball");
+        placePlayerBall();
     }
-
-    public static void removePlayerBall(Ball ball, boolean lastRemoved) {
-        Model.getCurrentPlayer().removeBall(ball);
-        updateView();
-
-        if (Model.getCurrentPlayer().getRemovableBalls().isEmpty())
-            finishTurn();
-
-        ballRemoved += 1;
-        if (lastRemoved || ballRemoved == 2) // finished removing
-            finishTurn();
-    }
-
 }
