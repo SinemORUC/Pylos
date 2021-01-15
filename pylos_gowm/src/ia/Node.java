@@ -9,10 +9,10 @@ import static ia.Move.Type.PLACE;
 import static ia.Move.Type.MOUNT;
 
 public class Node {
-    private Status status;
+    public final Status status;
     private final Move move;
     private Node best;
-    private List<Node> children = new ArrayList<>();
+    public final List<Node> children = new ArrayList<>();
 
     public Node(Status status) {
         this.status = status;
@@ -22,10 +22,6 @@ public class Node {
     private Node(Status status, Move move) {
         this.status = status.makeMove(move);
         this.move = move;
-    }
-
-    public Status getStatus() {
-        return status;
     }
 
     public Move getMove() {
@@ -40,11 +36,7 @@ public class Node {
         best = node;
     }
 
-    public List<Node> getChildren() {
-        return children;
-    }
-
-    public boolean isEnd(){
+    public boolean isEnd() {
         return status.isEnd();
     }
 
@@ -55,12 +47,12 @@ public class Node {
                 children.add(new Node(status, new Move(PLACE, p, (Position) null)));
                 return;
             }
-            if (status.squareOn(p)) {
+            if (status.squareOn(p))
                 if (status.isMountable(p))
                     mountedSquareChildren(p);
                 else
                     squareChildren(p);
-            } else if (status.isMountable(p)) {
+            else if (status.isMountable(p)) {
                 mountedChildren(p);
             }
         }
@@ -69,23 +61,21 @@ public class Node {
     public void mountedSquareChildren(Position p) {
         List<Position> removables = status.getRemovables();
         List<Position> toMount = Position.getToMount(p);
+        List<Position> remToMount = status.removablesToMount(p);
         Node child;
         for (Position remove : status.removablesToMount(p)) {
-            if (removables.isEmpty()) {
-                child = new Node(status, new Move(MOUNT, p, p));
-                children.add(child);
-            } else {
-                for (Position rem : removables) {
-                    for (Position r : removables) {
-                        if (rem == remove || r == remove || (toMount.contains(rem) && r != p) || (toMount.contains(r) && rem != p))
-                            continue;
-                        if (rem != r) {
-                            child = new Node(status, new Move(MOUNT, p, new Position[]{remove, rem, r}));
-                        } else {
-                            child = new Node(status, new Move(MOUNT, p, new Position[]{remove, rem}));
-                        }
-                        children.add(child);
+            child = new Node(status, new Move(MOUNT, p, remove));
+            children.add(child);
+            for (Position rem : removables) {
+                for (Position r : removables) {
+                    if (rem == remove || r == remove || (!toMount.contains(rem) && r != remove) || (!toMount.contains(r) && rem != p))
+                        continue;
+                    if (rem != r) {
+                        child = new Node(status, new Move(MOUNT, p, new Position[]{remove, rem, r}));
+                    } else {
+                        child = new Node(status, new Move(MOUNT, p, new Position[]{remove, rem}));
                     }
+                    children.add(child);
                 }
             }
         }

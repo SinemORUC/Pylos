@@ -1,7 +1,10 @@
 package ia;
 
+import controller.Controller;
 import model.Board;
+import model.Model;
 import model.Player;
+import model.Position;
 
 import static ia.Move.Type.PLACE;
 
@@ -11,32 +14,33 @@ public class IA extends Player {
     public final static int HEIGHT = 4;
 
     public IA() {
-        super();
+        super(-1);
     }
 
     public void play() {
-        Status status = new Status(new Board(), this);//todo get board
+        Status status = new Status(Model.getBoard(), this);//todo get board
         Node root = new Node(status);
         bestMove(root, DEPTH, Integer.MIN_VALUE);
         Move bestMove = root.getBest().getMove();
-        if (bestMove.getMove() == PLACE){
-            System.out.println("WIN");
+        if (bestMove.move == PLACE){
+            Controller.placeAIBall(bestMove.placeAt, (Position[]) bestMove.getRemoves().toArray(), false);
         } else {
-            System.out.println("DOUBLE DRAGON");
+            Controller.placeAIBall(bestMove.placeAt, (Position[]) bestMove.getRemoves().toArray(), true);
         }
+        Controller.finishTurn();
     }
 
     public int bestMove(Node node, int depth, int max) {
         if (depth == 0 || node.isEnd())
-            return node.getStatus().evaluateStatus();
+            return node.status.evaluateStatus();
         node.createChildren();
-        for (Node child : node.getChildren()) {
-            max = max(max, bestMove(child, depth - 1, max), node, child);
+        for (Node child : node.children) {
+            max = maxScore(max, bestMove(child, depth - 1, max), node, child);
         }
         return max;
     }
 
-    private int max(int max, int bestMove, Node node, Node child) {
+    private int maxScore(int max, int bestMove, Node node, Node child) {
         if (max < bestMove) {
             node.setBest(child);
             return bestMove;

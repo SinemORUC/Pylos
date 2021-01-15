@@ -11,14 +11,16 @@ import java.util.List;
 import static ia.IA.HEIGHT;
 
 public class Status {
-    public static final int REMAIN_POINT = 130;
-    public static final int SQUARE_POINT = 90;
-    public static final int MIDDLE_POINT = 35;
-    public static final int REMOVABLE_POINT = 15;
-    private int currentPlayer;
-    private int otherPlayer;
+    private static final int END_POINT = 500;
+    private static final int REMAIN_POINT = 130;
+    private static final int SQUARE_POINT = 90;
+    private static final int MIDDLE_POINT = 35;
+    private static final int REMOVABLE_POINT = 15;
+
     private static final int ia = 1;
     private static final int player = 2;
+    private int currentPlayer;
+    private int otherPlayer;
     private int[][][] board = new int[HEIGHT][][];
     private int[] remains = new int[3];
     private List<Position> playables = new ArrayList<>();
@@ -35,7 +37,7 @@ public class Status {
             this.board[z] = new int[HEIGHT - z][HEIGHT - z];
             for (int y = 0; y < HEIGHT - z; y++) {
                 for (int x = 0; x < HEIGHT - z; x++) {
-                    ball = board.ballAt(x, y, z);
+                    ball = board.ballAt(Position.at(x, y, z));
                     if (ball != null) {
                         player = ball.getOwner() == current ? currentPlayer : otherPlayer;
                         this.board[z][y][x] = player;
@@ -55,8 +57,9 @@ public class Status {
         currentPlayer = status.currentPlayer;
         otherPlayer = status.otherPlayer;
         remains = status.remains.clone();
-        playables = new ArrayList<>(status.playables);
         board = status.board.clone();
+        playables = new ArrayList<>(status.playables);
+        removables = null;
     }
 
     public List<Position> getPlayables() {
@@ -67,16 +70,16 @@ public class Status {
         if (z == 0 && board[z][y][x] == 0)
             return true;
         for (Position p : Position.getToMount(Position.at(x, y, z)))
-            if (board[z - 1][p.getY()][p.getX()] == 0)
+            if (board[z - 1][p.y][p.x] == 0)
                 return false;
         return true;
     }
 
     public boolean isMountable(Position p) {
-        if (p.getZ() == 0)
+        if (p.z == 0)
             return false;
         for (Position pos : Position.getToMount(p))
-            if (board[p.getZ() - 1][pos.getY()][pos.getX()] == 0)
+            if (board[pos.z][pos.y][pos.x] == 0)
                 return false;
         List<Position> removes = removablesToMount(p);
         return removes != null && !removes.isEmpty();
@@ -87,11 +90,11 @@ public class Status {
     }
 
     public List<Position> removablesToMount(Position pos) {
-        if (pos.getZ() == HEIGHT - 1)
+        if (pos.z == HEIGHT - 1)
             return null;
         List<Position> removes = new ArrayList<>(removables);
         removes.removeAll(Position.getToMount(pos));
-        removes.removeIf(p -> p.getZ() >= pos.getZ());
+        removes.removeIf(p -> p.z >= pos.z);
         return removes;
     }
 
@@ -100,9 +103,9 @@ public class Status {
     }
 
     public boolean isRemovable(Position p) {
-        int z = p.getZ();
-        int y = p.getY();
-        int x = p.getX();
+        int z = p.z;
+        int y = p.y;
+        int x = p.x;
         if (board[z][y][x] == 0) {
             return false;
         }
@@ -116,14 +119,15 @@ public class Status {
     public boolean squareOn(Position p) {
         return squareOn(p, currentPlayer);
     }
+
     private boolean squareOn(Position pos, int player) {
-        if (pos.getZ() >= 2)
+        if (pos.z >= 2)
             return false;
         boolean isSquare;
-        for (List<Position> squares : Position.getFourSquare(pos)) {
+        for (List<Position> square : Position.getSquares(pos)) {
             isSquare = true;
-            for (Position p : squares) {
-                int cell = board[p.getZ()][p.getY()][p.getX()];
+            for (Position p : square) {
+                int cell = board[p.z][p.y][p.x];
                 if ((cell == 0 && p != pos) || (cell != 0 && cell != player)) {
                     isSquare = false;
                     break;
@@ -134,34 +138,6 @@ public class Status {
         }
         return false;
     }
-//    public List<Position> bestRemoves(Position p) {
-//        List<Position> removes = new ArrayList<>(removables);
-//        if (p.getZ() > 0)
-//            removes.removeAll(Position.getToMount(p));
-//        Map<Position, Integer> bestRemoves = new HashMap<Position, Integer>();
-//        int total = 0, square;
-//        for (Position rem : removes) {
-//            for (List<Position> squares : Position.getFourSquare(rem)) {
-//                square = 0;
-//                for (Position pos : squares) {
-//                    int cell = board[pos.getZ()][pos.getY()][pos.getX()];
-//                    if (cell == player)
-//                        square++;
-//                    if (cell != player) {
-//                        square = 0;
-//                        break;
-//                    }
-//                }
-//                square = square == 4 ? 0 : square;
-//                total += square;
-//            }
-//            bestRemoves.put(rem, total);
-//        }
-//        for (Position rem :)
-
-//            return false;
-
-//    }
 
     private void queryRemovables() {
         List<Position> removables = new ArrayList<>();
@@ -181,11 +157,11 @@ public class Status {
 
     public Status makeMove(Move move) {
         Status next = new Status(this);
-        Position placeAt = move.getPlace();
+        Position placeAt = move.placeAt;
         if (placeAt != null) {
-            int x = placeAt.getX();
-            int y = placeAt.getY();
-            int z = placeAt.getZ();
+            int x = placeAt.x;
+            int y = placeAt.y;
+            int z = placeAt.z;
             next.board[z][y][x] = next.currentPlayer;
             next.playables.remove(placeAt);
             next.remains[currentPlayer]--;
@@ -198,12 +174,12 @@ public class Status {
         List<Position> removes = move.getRemoves();
         if (removes != null && !removes.isEmpty()) {
             for (Position remove : removes) {
-                next.board[remove.getZ()][remove.getY()][remove.getX()] = 0;
+                next.board[remove.z][remove.y][remove.x] = 0;
                 next.playables.add(remove);
                 next.remains[currentPlayer]++;
             }
             for (Position play : playables) {
-                if (!next.isPlayable(play.getX(), play.getY(), play.getZ()))
+                if (!next.isPlayable(play.x, play.y, play.z))
                     next.playables.remove(play);
             }
         }
@@ -219,12 +195,16 @@ public class Status {
                 for (int x = 0; x < HEIGHT - z; x++) {
                     int cell = board[z][y][x];
                     if (cell == ia) {
-                        if (Position.isMiddle(x, y, z))
+                        if (Position.isTop(Position.at(x, y, z)))
+                            score += END_POINT;
+                        else if (Position.isMiddle(x, y, z))
                             score += REMOVABLE_POINT;
                         else if (isRemovable(Position.at(x, y, z)))
                             score += MIDDLE_POINT;
                     } else if (cell == player) {
-                        if (Position.isMiddle(x, y, z))
+                        if (Position.isTop(Position.at(x, y, z)))
+                            score -= END_POINT;
+                        else if (Position.isMiddle(x, y, z))
                             score += REMOVABLE_POINT;
                         else if (isRemovable(Position.at(x, y, z)))
                             score -= MIDDLE_POINT;

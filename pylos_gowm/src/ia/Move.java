@@ -7,35 +7,28 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Move {
-    private final Type move;
-    private final Position place;
-    private List<Position> removes = new ArrayList<>();
+    public final Type move;
+    public final Position placeAt;
+    private final List<Position> removes = new ArrayList<>();
 
     public Move(Type type, Position place, Position remove) {
         move = type;
-        this.place = place;
-        removes.add(remove);
+        this.placeAt = place;
+        if (remove != null)
+            removes.add(remove);
     }
 
     public Move(Type type, Position place, Position[] removes) {
         move = type;
-        this.place = place;
+        this.placeAt = place;
         this.removes.addAll(Arrays.asList(removes));
-    }
-
-    public Type getMove() {
-        return move;
-    }
-
-    public Position getPlace() {
-        return place;
     }
 
     public List<Position> getRemoves() {
         return removes;
     }
 
-    public void addRemove(Position p){
+    public void addRemove(Position p) {
         removes.add(p);
     }
 
