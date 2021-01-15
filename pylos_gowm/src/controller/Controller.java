@@ -5,6 +5,8 @@ import model.Ball;
 import model.Model;
 import model.Player;
 import model.Position;
+
+import java.util.Scanner;
 //import view.View;//todo
 
 public abstract class Controller {
@@ -22,15 +24,13 @@ public abstract class Controller {
 
     public static void initTurn() {
         Player currentPlayer = Model.getCurrentPlayer();
-        currentPlayer.resetAction();
-        ballRemoved = 0;
-        updateView();
         if (currentPlayer.allBallsOnBoard()) {
             nextTurn();
         } else {
             setPlayerStatus("Place or mount a ball (right click)");
             if (currentPlayer instanceof IA)
                 ((IA) currentPlayer).play();
+            placePlayerBall();
         }
     }
 
@@ -79,7 +79,20 @@ public abstract class Controller {
 
     }
 
-    public static void placePlayerBall(Position position) {
+    public static void placePlayerBall() {
+        Scanner scan = new Scanner(System.in);
+        Position position = null;
+        do{
+            System.out.println("Enter a level (1-4)");
+            int z = scan.nextInt();
+            System.out.println("Enter a row (1- " + (Model.HEIGHT - z) + ")");
+            int y = scan.nextInt();
+            System.out.println("Enter a column (1- " + (Model.HEIGHT - z) + ")");
+            int x = scan.nextInt();
+            if(Position.isValid(x,y,z))
+                position = Position.at(x,y,z);
+        } while (position == null);
+
         Player currentPlayer = Model.getCurrentPlayer();
         currentPlayer.putBallOnBoard(position);
         updateView();
@@ -87,6 +100,7 @@ public abstract class Controller {
             removeBalls();
         else
             finishTurn();
+
     }
 
     public static void mountPlayerBall(Ball ball) {
@@ -107,4 +121,5 @@ public abstract class Controller {
         if (lastRemoved || ballRemoved == 2) // finished removing
             finishTurn();
     }
+
 }
